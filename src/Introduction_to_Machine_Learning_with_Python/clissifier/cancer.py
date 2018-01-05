@@ -22,7 +22,9 @@ def cancer_dataset():
     score(DecisionTreeClassifier, X_train, X_test, y_train, y_test, random_state=0, max_depth=4)
     score(RandomForestClassifier, X_train, X_test, y_train, y_test, n_estimators=100, random_state=0, max_features=2)
     score(GradientBoostingClassifier, X_train, X_test, y_train, y_test, random_state=0, max_depth=1)
+    score(GradientBoostingClassifier, X_train, X_test, y_train, y_test, random_state=0, learning_rate=0.01)
 
+    plot_feature_importances_cancer(cancer.feature_names, GradientBoostingClassifier().fit(X_train, y_train))
     # dot_data = export_graphviz(
     #     fit(DecisionTreeClassifier, X_train, y_train, random_state=0, max_depth=4),
     #     out_file=None,
@@ -61,6 +63,14 @@ def score(method, X_train, X_test, y_train, y_test, **kwargs):
     return train_score, test_score
 
 
-cancer_dataset()
 
+def plot_feature_importances_cancer(feature_names, model):
+    n_features = len(feature_names)
+    plt.barh(range(n_features), model.feature_importances_, align='center')
+    plt.yticks(np.arange(n_features), feature_names)
+    plt.xlabel("Важность признака")
+    plt.ylabel("Признак")
+
+
+cancer_dataset()
 plt.show()
