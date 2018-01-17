@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import mglearn
-
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC, SVC
+
+from Introduction_to_Machine_Learning_with_Python.clissifier.utils import score
 
 
 def make_forge():
@@ -31,9 +31,9 @@ def make_forge():
     plt.ylabel("Второй признак")
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    classify(KNeighborsClassifier, X_train, X_test, y_train, y_test, n_neighbors=3)
-    classify(LinearSVC, X_train, X_test, y_train, y_test)
-    classify(LogisticRegression, X_train, X_test, y_train, y_test)
+    score(KNeighborsClassifier, X_train, X_test, y_train, y_test, n_neighbors=3)
+    score(LinearSVC, X_train, X_test, y_train, y_test)
+    score(LogisticRegression, X_train, X_test, y_train, y_test)
 
     svm = SVC(kernel='rbf', C=10, gamma=5).fit(X, y)
     print(f"SVC Правильность на тестовом наборе: {svm.score(X_test, y_test):.2f}")
@@ -47,16 +47,6 @@ def make_forge():
                              s=15, markeredgewidth=3, ax=axes[1][0], markers=['+', 'v'])
     plt.xlabel("Признак 0")
     plt.ylabel("Признак 1")
-
-
-def classify(method, X_train, X_test, y_train, y_test, **kwargs):
-    clf = method(**kwargs)
-    clf.fit(X_train, y_train)
-    print(f"{method.__name__} Правильность на тестовом наборе: {clf.score(X_test, y_test):.2f}")
-    prediction = clf.predict(X_test)
-    plt.plot(X_test, prediction, '*')
-
-
 
 
 make_forge()
