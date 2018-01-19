@@ -4,6 +4,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsRegressor
 
+from Introduction_to_Machine_Learning_with_Python.utils import curry
+
 
 def make_wave():
     X, y = mglearn.datasets.make_wave(n_samples=40)
@@ -15,26 +17,22 @@ def make_wave():
     plt.xlabel("Признак")
     plt.ylabel("Целевая переменная")
 
-    prediction, _ = predict(KNeighborsRegressor, X_train, X_test, y_train, y_test, n_neighbors=3)
-    plt.plot(X_test, prediction, 'v')
+    score = curry(X_train, X_test, y_train, y_test)
 
-    prediction, _ = predict(LinearRegression, X_train, X_test, y_train, y_test)
+    prediction = score(KNeighborsRegressor, n_neighbors=3).predict(X_test)
+    plt.plot(X_test, prediction, '*')
+
+    prediction = score(LinearRegression).predict(X_test)
     plt.plot(X_test, prediction, '+')
-
-
-def predict(method, X_train, X_test, y_train, y_test, **kwargs):
-    reg = method(**kwargs).fit(X_train, y_train)
-    print(f"{method.__name__} Правильность на обучающем наборе: {reg.score(X_train, y_train):.2f}")
-    print(f"{method.__name__} Правильность на тестовом наборе: {reg.score(X_test, y_test):.2f}")
-    return reg.predict(X_test), reg.score(X_test, y_test)
 
 
 def test_test_neighbors_settings(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    scores = [predict(KNeighborsRegressor, X_train, X_test, y_train, y_test, n_neighbors=i)[1] for i in range(1, 11)]
+    score = curry(X_train, X_test, y_train, y_test)
+    scores = [score(KNeighborsRegressor, n_neighbors=i).score(X_test, y_test) for i in range(1, 11)]
     plt.plot(range(1, 11), scores)
 
 
-make_wave()
-# test_test_neighbors_settings(*mglearn.datasets.make_wave(n_samples=40))
+# make_wave()
+test_test_neighbors_settings(*mglearn.datasets.make_wave(n_samples=40))
 plt.show()
