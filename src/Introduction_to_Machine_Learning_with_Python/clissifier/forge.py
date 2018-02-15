@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC, SVC
 
-from Introduction_to_Machine_Learning_with_Python.clissifier.utils import score
+from Introduction_to_Machine_Learning_with_Python.utils import score
 
 
 def make_forge():

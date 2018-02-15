@@ -39,6 +39,7 @@ def cancer_dataset():
     u.score(SVC, *u.scale_range(X_train, X_test), y_train, y_test, C=1000)
     # plot_feature_importances_cancer(cancer.feature_names, GradientBoostingClassifier().fit(X_train, y_train))
 
+    # Multi-layer Perceptron classifier
     score(MLPClassifier, random_state=0)
     score(MLPClassifier, random_state=0, solver='lbfgs', hidden_layer_sizes=[100, 10, 5], alpha=0.001)
 
@@ -47,8 +48,6 @@ def cancer_dataset():
     mlp_score(solver='lbfgs', hidden_layer_sizes=[100, 10, 5], alpha=0.001)
     mlpc = mlp_score(solver='lbfgs', hidden_layer_sizes=[100, 10, 5], alpha=0.1)
     u.draw_mlp_map(mlpc, feature_names=cancer.feature_names)
-
-
 
 
 def draw_decision_tree(cancer, X_train, y_train):

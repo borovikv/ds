@@ -1,4 +1,9 @@
+import ssl
+
+import mglearn
+import numpy as np
 from matplotlib import pyplot as plt
+from sklearn.datasets import fetch_lfw_people
 
 
 def score(method, X_train, X_test, y_train, y_test, plot=False, **kwargs):
@@ -50,3 +55,38 @@ def draw_mlp_map(mlp, feature_names):
     plt.xlabel("Столбцы матрицы весов")
     plt.ylabel("Входные характеристики")
     plt.colorbar()
+
+
+def histograms_by_features(dataset):
+    fig, axes = plt.subplots(15, 2, figsize=(10, 20))
+    targets = [dataset.data[dataset.target == t] for t in np.unique(dataset.target)]
+    ax = axes.ravel()
+    for i in range(len(dataset.feature_names)):
+        _, bins = np.histogram(dataset.data[:, i], bins=50)
+        for j, data_group in enumerate(targets):
+            ax[i].hist(data_group[:, i], bins=bins, color=mglearn.cm3(j * 2), alpha=.5)
+        ax[i].set_title(dataset.feature_names[i])
+        ax[i].set_yticks(())
+    ax[0].set_xlabel("Feature value")
+    ax[0].set_ylabel("Frequency")
+    ax[0].legend(dataset.target_names, loc="best")
+    fig.tight_layout()
+
+
+def get_people():
+    ssl._create_default_https_context = ssl._create_unverified_context
+    people = fetch_lfw_people(min_faces_per_person=20, resize=0.7)
+    # image_shape = people.images[0].shape
+    # print(people.images.shape)
+    # print(image_shape)
+    # print_photo_amout_per_people(people)
+    # show_people_image_sample(people)
+    mask = np.zeros(people.target.shape, dtype=np.bool)
+    for target in np.unique(people.target):
+        mask[np.where(people.target == target)[0][:50]] = 1
+    y_people = people.target[mask]
+    X_people = people.data[mask]
+    X_people = X_people / 255.
+    # print(len(X_people[1]))
+    # print(len(X_people))
+    return people, X_people, y_people
