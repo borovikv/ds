@@ -4,6 +4,10 @@ import mglearn
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.datasets import fetch_lfw_people
+from sklearn.model_selection import train_test_split
+
+from ds.settings import RESOURCE_ROOT
+import os
 
 
 def score(method, X_train, X_test, y_train, y_test, plot=False, **kwargs):
@@ -17,6 +21,11 @@ def score(method, X_train, X_test, y_train, y_test, plot=False, **kwargs):
         prediction = clf.predict(X_test)
         plt.plot(X_test, prediction, '*')
     return clf
+
+
+def split_score(method, x, y, **kwargs):
+    X_train, X_test, y_train, y_test = train_test_split(x, y, random_state=0)
+    return score(method, X_train, X_test, y_train, y_test, **kwargs)
 
 
 def scale_std(X_train, X_test):
@@ -90,3 +99,7 @@ def get_people():
     # print(len(X_people[1]))
     # print(len(X_people))
     return people, X_people, y_people
+
+
+def resource_path(*args):
+    return os.path.join(RESOURCE_ROOT, 'introduction_to_ml_with_python-master', *args)

@@ -9,7 +9,7 @@ import ds.settings as s
 
 
 def parse_records(path):
-    abspath = os.path.join(s.RESOURCE_ROOT, path)
+    abspath = os.path.join(s.RESOURCE_ROOT, 'pydata-book-master', path)
     return [json.loads(line) for line in open(abspath)]
 
 
