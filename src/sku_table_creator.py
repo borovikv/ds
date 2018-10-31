@@ -16,10 +16,10 @@ def transform():
     df3 = df.set_index('SKU').join(df2.set_index('SKU'), lsuffix='_orig', how='left').reset_index()
     df3.retail_price = df3.retail_price.combine_first(df3.retail_price_orig)
     df3.currency_code = df3.currency_code.fillna('USD')
-    df3.price_attributable_for_royalty = np.round(df3.retail_price * df3.percent_attributable_for_royalty, 2)
+    df3.price_attributable_for_royalty = np.round(df3.retail_price * df3.percent_attributable_for_royalty, 4)
 
     cols = ['currency_code', 'retail_price', 'price_attributable_for_royalty', 'SKU', 'subscription_periods', 'comment']
-    df3[cols].to_csv('out.csv', index=False, quoting=csv.QUOTE_ALL, quotechar="'")
+    df3[cols].sort_values(['SKU', 'currency_code']).to_csv('sku_table.csv', index=False, quoting=csv.QUOTE_ALL)
     return 'out.csv'
 
 
