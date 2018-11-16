@@ -97,3 +97,6 @@ ENV/
 
 .idea/
 resources/*
+src/skus/SKUs.csv
+src/skus/out.csv
+src/skus/sku_table.csv
