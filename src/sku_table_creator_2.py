@@ -7,20 +7,20 @@ import pandas as pd
 
 def transform():
     converters = {'retail_price': to_f, 'price_attributable_for_royalty': to_f, 'retail_prices_in_currencies': to_dict}
-    df = pd.read_csv('SKUs.csv', index_col='SKU', converters=converters)
+    df = pd.read_csv('SKUs.csv', index_col='sku', converters=converters)
     df['percent_attributable_for_royalty'] = (df.price_attributable_for_royalty / df.retail_price).fillna(0)
     df.retail_prices_in_currencies.fillna(df.retail_price.apply(lambda v: {'USD': v}), inplace=True)
 
     df_retail_prices_in_currencies = pd.DataFrame(df.retail_prices_in_currencies.tolist(), index=df.index)
     columns = ['percent_attributable_for_royalty', 'subscription_periods', 'comment']
     df3 = df[columns].join(df_retail_prices_in_currencies).reset_index()
-    df3 = pd.melt(df3, id_vars=['SKU'] + columns, value_name="retail_price", var_name='currency_code').dropna()
+    df3 = pd.melt(df3, id_vars=['sku'] + columns, value_name="retail_price", var_name='currency_code').dropna()
     df3['price_attributable_for_royalty'] = np.round(df3.retail_price * df3.percent_attributable_for_royalty, 4)
 
     df3.drop('percent_attributable_for_royalty', axis=1, inplace=True)
     df3 = df3[
-        ["currency_code", "retail_price", "price_attributable_for_royalty", "SKU", "subscription_periods", "comment"]]
-    df3.sort_values(['SKU', 'currency_code']).to_csv('sku_table.csv', index=False, quoting=csv.QUOTE_ALL)
+        ["currency_code", "retail_price", "price_attributable_for_royalty", "sku", "subscription_periods", "comment"]]
+    df3.sort_values(['sku', 'currency_code']).to_csv('sku_table.csv', index=False, quoting=csv.QUOTE_ALL)
 
 
 def to_f(v):
@@ -28,7 +28,21 @@ def to_f(v):
 
 
 def to_dict(v):
-    return {c: float(p) for k, (c, p) in json.loads(v).items() if len(k) == 3} if v else None
+    if not v:
+        return None
+    r = {k: float(p) for k, (c, p) in json.loads(v).items()}
+    result = {}
+    for currency, price in r.items():
+        if len(currency) == 3:  # ARS
+            result[currency] = price
+        else:
+            kparts = currency.split('-')
+            if currency.startswith('XXX') and len(kparts[-1]) == 3 and kparts[-1] not in r:  # XXX-PAYMENTEZ-ARS
+                result[kparts[-1]] = price
+            elif not currency.startswith('XXX') and kparts[0] not in result:  # ARS-2016-JUL
+                result[kparts[0]] = price
+
+    return result
 
 
 def equote(v):
