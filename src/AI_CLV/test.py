@@ -80,7 +80,8 @@ for country in countries:
     country_df = df[country]
     country_df = country_df[country_df != 0]
     # country_df = df[country]
-    X, y = np.array(country_df.index).reshape(-1, 1), country_df.values.reshape(-1, 1).ravel()
+    X = np.array(df.index).reshape(-1, 1)  # [[0], [1], ...]
+    y = df.US.values
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
     y_train_log = np.log(y_train + 1)
     y_test_log = np.log(y_test + 1)
