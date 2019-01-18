@@ -22,6 +22,10 @@ def get_survival_df(file_name):
     except AttributeError:
         pass
     df = pd.pivot_table(df, values='count', index=['tenure'], columns=['country_code'], aggfunc=np.sum)
+    return survival(df)
+
+
+def survival(df):
     df.loc[-1] = df.sum()
     df.index = df.index + 1  # shifting index
     df = df.sort_index()  # sorting by index
