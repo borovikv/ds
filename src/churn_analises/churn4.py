@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.cluster import KMeans
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
@@ -17,6 +18,19 @@ def get_df():
     )
     df = df.fillna(0)
     df = (df - df.mean()) / df.std(ddof=0).pow(2)
+    for i in range(12):
+        # df[i,'paid_ratio'] = (df[i]['free'] - df[i]['paid'])/df[i]['paid']
+        # df[i,'free_ratio'] = (df[i]['free'] - df[i]['paid'])/df[i]['free']
+        df[i,'paid_ratio_2'] = df[i]['paid'] / (df[i]['free'] + df[i]['paid'])
+        df[i,'free_ratio_2'] = df[i]['free']/ (df[i]['free'] + df[i]['paid'])
+        df[i,'diff_1'] = df[i]['free'] - df[i]['paid']
+
+    df = df.fillna(0)
+
+    # df = df.iloc[:, df.columns.get_level_values(1) == 'paid_ratio_2']
+    # df = df.iloc[:, df.columns.get_level_values(1) == 'free_ratio_2']
+    # df = df.iloc[:, df.columns.get_level_values(1) == 'diff_1']
+    # df.sort_index(axis=1, inplace=True)
     return df
 
 
@@ -25,18 +39,20 @@ def test_classifiers():
     X = df.values
     y = np.array([j for i, j in df.index.values])
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    print('*' * 15, len(y_test))
     X_not_churn = X_train[y_train == 0]
     X_churn = X_train[y_train == 1]
     X_not_churn_trimmed = X_not_churn[np.random.randint(X_not_churn.shape[0], size=len(X_churn)), :]
     X_train = np.concatenate((X_not_churn_trimmed, X_churn))
     y_train = np.array([0] * len(X_not_churn_trimmed) + [1] * len(X_churn))
+    # X_test = X_test.reshape(-1, 1)
+    # X_train = X_train.reshape(-1, 1)
     clfs = [
         RandomForestClassifier(n_estimators=50, random_state=0),
-        KNeighborsClassifier(n_neighbors=12),
-        DecisionTreeClassifier(max_depth=10, random_state=0),
-        LogisticRegression(),
-        LinearSVC(C=0.01),
+        GradientBoostingClassifier(),
+        # KNeighborsClassifier(n_neighbors=12),
+        # DecisionTreeClassifier(max_depth=10, random_state=0),
+        # LogisticRegression(),
+        # LinearSVC(C=0.01),
     ]
     #
     for clf in clfs:
