@@ -1,62 +1,68 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from imblearn.under_sampling import RandomUnderSampler
+from sklearn.decomposition import PCA
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
-from sklearn.tree.tree import DecisionTreeClassifier
-
+from sklearn.feature_selection import RFE
 
 def get_df():
     df = pd.read_csv('churn4_1.csv')
     df = pd.pivot_table(
-        df, index=['dwed_account_key', 'churn'], columns=['week_no', 'type'], values='seconds', aggfunc=np.sum
+        df, index=['dwed_account_key', 'churn'], columns=['week_no', 'type'], values='seconds', aggfunc=np.max
     )
     df = df.fillna(0)
-    df = (df - df.mean()) / df.std(ddof=0).pow(2)
+
+    df.to_csv('out_pivot.csv')
     for i in range(12):
-        # df[i,'paid_ratio'] = (df[i]['free'] - df[i]['paid'])/df[i]['paid']
-        # df[i,'free_ratio'] = (df[i]['free'] - df[i]['paid'])/df[i]['free']
-        df[i,'paid_ratio_2'] = df[i]['paid'] / (df[i]['free'] + df[i]['paid'])
-        df[i,'free_ratio_2'] = df[i]['free']/ (df[i]['free'] + df[i]['paid'])
-        df[i,'diff_1'] = df[i]['free'] - df[i]['paid']
-
+        df[i, 'paid_ratio'] = df[i]['paid'] / (df[i]['free'] + df[i]['paid'])
     df = df.fillna(0)
+    df = (df - df.mean()) / df.std(ddof=0).pow(2)
 
-    # df = df.iloc[:, df.columns.get_level_values(1) == 'paid_ratio_2']
-    # df = df.iloc[:, df.columns.get_level_values(1) == 'free_ratio_2']
-    # df = df.iloc[:, df.columns.get_level_values(1) == 'diff_1']
-    # df.sort_index(axis=1, inplace=True)
+    # df = df.iloc[:, df.columns.get_level_values(1) == 'paid_ratio']
+
     return df
 
 
 def test_classifiers():
     df = get_df()
     X = df.values
+
     y = np.array([j for i, j in df.index.values])
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-    X_not_churn = X_train[y_train == 0]
-    X_churn = X_train[y_train == 1]
-    X_not_churn_trimmed = X_not_churn[np.random.randint(X_not_churn.shape[0], size=len(X_churn)), :]
-    X_train = np.concatenate((X_not_churn_trimmed, X_churn))
-    y_train = np.array([0] * len(X_not_churn_trimmed) + [1] * len(X_churn))
+
+    X_train, y_train = resampling(X_train, y_train)
+
+    select = RFE(RandomForestClassifier(n_estimators=50, random_state=0), n_features_to_select=30)
+    select.fit(X_train, y_train)
+    X_train = select.transform(X_train)
+    X_test = select.transform(X_test)
+
+
+    plot_2d_space(X_train, y_train)
     # X_test = X_test.reshape(-1, 1)
     # X_train = X_train.reshape(-1, 1)
     clfs = [
         RandomForestClassifier(n_estimators=50, random_state=0),
-        GradientBoostingClassifier(),
+        # GradientBoostingClassifier(),
         # KNeighborsClassifier(n_neighbors=12),
         # DecisionTreeClassifier(max_depth=10, random_state=0),
         # LogisticRegression(),
         # LinearSVC(C=0.01),
+        LogisticRegression(),
     ]
     #
     for clf in clfs:
         print_stats(clf, X_train, y_train, X_test, y_test)
+
+
+def resampling(X_train, y_train):
+    ros = RandomUnderSampler(random_state=0)
+    X_ros, y_ros = ros.fit_sample(X_train, y_train)
+    return X_ros, y_ros
 
 
 def plot():
@@ -103,4 +109,21 @@ def print_confusion_matrix(clf, X, y):
     print(classification_report(y, prediction, target_names=['not churn', 'churn']))
 
 
+def plot_2d_space(X, y, label='Classes'):
+    colors = ['#1F77B4', '#FF7F0E']
+    markers = ['o', 's']
+    pca = PCA(n_components=2)
+    X = pca.fit_transform(X)
+    for l, c, m in zip(np.unique(y), colors, markers):
+        plt.scatter(
+            X[y == l, 0],
+            X[y == l, 1],
+            c=c, label=l, marker=m
+        )
+    plt.title(label)
+    plt.legend(loc='upper right')
+    plt.show()
+
+
 test_classifiers()
+plt.show()

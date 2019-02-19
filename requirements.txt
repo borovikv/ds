@@ -9,3 +9,4 @@ nose
 sklearn
 mglearn==0.1.6
 graphviz
+imblearn
