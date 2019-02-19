@@ -9,6 +9,7 @@ from sklearn.metrics import classification_report, confusion_matrix, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.feature_selection import RFE
 
+
 def get_df():
     df = pd.read_csv('churn4_1.csv')
     df = pd.pivot_table(
@@ -16,13 +17,12 @@ def get_df():
     )
     df = df.fillna(0)
 
-    df.to_csv('out_pivot.csv')
-    for i in range(12):
-        df[i, 'paid_ratio'] = df[i]['paid'] / (df[i]['free'] + df[i]['paid'])
-    df = df.fillna(0)
+    # for i in range(12):
+    #     df[i, 'paid_ratio'] = df[i]['paid'] / (df[i]['free'] + df[i]['paid'])
     df = (df - df.mean()) / df.std(ddof=0).pow(2)
 
     # df = df.iloc[:, df.columns.get_level_values(1) == 'paid_ratio']
+    df = df.fillna(0)
 
     return df
 
@@ -52,7 +52,7 @@ def test_classifiers():
         # DecisionTreeClassifier(max_depth=10, random_state=0),
         # LogisticRegression(),
         # LinearSVC(C=0.01),
-        LogisticRegression(),
+        # LogisticRegression(),
     ]
     #
     for clf in clfs:
@@ -112,16 +112,21 @@ def print_confusion_matrix(clf, X, y):
 def plot_2d_space(X, y, label='Classes'):
     colors = ['#1F77B4', '#FF7F0E']
     markers = ['o', 's']
-    pca = PCA(n_components=2)
-    X = pca.fit_transform(X)
-    for l, c, m in zip(np.unique(y), colors, markers):
-        plt.scatter(
-            X[y == l, 0],
-            X[y == l, 1],
-            c=c, label=l, marker=m
-        )
-    plt.title(label)
-    plt.legend(loc='upper right')
+    # pca = PCA(n_components=2)
+    # X = pca.fit_transform(X)
+    max_rows = 12
+    fig, axes = plt.subplots(max_rows, max_rows, figsize=(50, 50))
+    for i in range(max_rows, 24):
+        for j in range(max_rows, 24):
+            if i != j:
+                for l, c, m in zip(np.unique(y), colors, markers):
+                    axes[i % max_rows][j % max_rows].scatter(
+                        X[y == l, i],
+                        X[y == l, j],
+                        c=c, label=l, marker=m
+                    )
+                # axes[i][j].title(label)
+                # axes[i][j].legend(loc='upper right')
     plt.show()
 
 
