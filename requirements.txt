@@ -10,3 +10,5 @@ sklearn
 mglearn==0.1.6
 graphviz
 imblearn
+boto3
+s3fs
