@@ -10,8 +10,6 @@ from pyspark.sql.types import *
 
 normalizedViewershipFileName = 's3://codemobs-datalab/ml/features_hidden_2018/'
 mediaFileName = 's3://codemobs-datalab/ml/cr_media/'
-recentViewershipLimit = 60
-
 
 
 # Read viewership data from input file
@@ -58,24 +56,10 @@ dfPopularity = dfViewNormalizedWithMedia \
     .select('mediaIdInt', 'mediaId', 'expPopular', 'fracPopular') \
     .cache()
 
-dfViewWithInvPop = dfViewNormalizedWithMedia \
+dfViewForAls = dfViewNormalizedWithMedia \
     .join(dfPopularity, ['mediaIdInt', 'mediaId']) \
     .withColumn('implicitRating', udf(lambda x, y: float(x) * float(y), FloatType())('avgFracViewed', 'expPopular')) \
-    .select('userId', 'userIdInt', 'mediaId', 'mediaIdInt', 'implicitRating', 'latestEventSent')
-
-dfRecentViewershipRanked = dfViewWithInvPop \
-    .select('*', func.rank().over(Window().partitionBy('userId')
-                                  .orderBy(func.desc('latestEventSent'))).alias('recentRank')) \
-    .cache()
-
-dfRecentViewership = dfRecentViewershipRanked \
-    .filter(func.col('recentRank') <= recentViewershipLimit) \
-    .withColumn('userIdInt2', udf(lambda x: x + maxUserIdInt, IntegerType())('userIdInt')) \
-    .select(col('userIdInt2').alias('userIdInt'), 'mediaIdInt', 'implicitRating')
-
-dfViewForAls = dfViewWithInvPop \
-    .select('userIdInt', 'mediaIdInt', 'implicitRating') \
-    .union(dfRecentViewership)
+    .select('userIdInt', 'mediaIdInt', 'implicitRating')
 
 # Build the recommendation model using ALS on the training data
 maxIterParam = 10
@@ -100,10 +84,8 @@ featuresDF = model.userFactors \
     .withColumn('userIdInt', udf(lambda x: x - maxUserIdInt)('id')) \
     .drop("id")
 
-user_feateures_df = featuresDF \
-    .join(dfUserIdMap, featuresDF.userIdInt == dfUserIdMap.userIdInt) \
-    .select("userId", "features")
-user_feateures_df_to_save = user_feateures_df \
+user_feateures_df = featuresDF.join(dfUserIdMap, featuresDF.userIdInt == dfUserIdMap.userIdInt) \
+    .select("userId", "features") \
     .withColumn('f1', F.col('features').getItem(0)) \
     .withColumn('f2', F.col('features').getItem(1)) \
     .withColumn('f3', F.col('features').getItem(2)) \
@@ -113,4 +95,4 @@ user_feateures_df_to_save = user_feateures_df \
 
 version = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 path = "s3://codemobs-datalab/ml/vladimir/hidden_features/v={version}".format(version=version)
-user_feateures_df_to_save.coalesce(1).write.save(path, format='csv', header=True)
+user_feateures_df.write.save(path, format='csv', header=True)

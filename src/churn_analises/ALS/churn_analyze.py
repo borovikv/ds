@@ -48,8 +48,9 @@ featureCols = [
     "f5",
 ]
 
-df_features_17 = load_csv("s3://codemobs-datalab/ml/features_17_2018_clear_check/")
-hidden_features_df = load_csv("s3://codemobs-datalab/ml/hidden_features_results.csv/")
+df_features_17 = load_csv('s3://codemobs-datalab/ml/features_17_2018_clear_check/')
+version = '20190301_084913'
+hidden_features_df = load_csv('s3://codemobs-datalab/ml/vladimir/hidden_features/v=%s/' % version)
 
 data = df_features_17.join(hidden_features_df, df_features_17.dwed_account_key == hidden_features_df.userId)
 data = VectorAssembler(inputCols=featureCols, outputCol="features").transform(data)
@@ -57,6 +58,7 @@ data = VectorAssembler(inputCols=featureCols, outputCol="features").transform(da
 (df_train_full, testData) = data.randomSplit([0.7, 0.3], seed=15)
 trainingData = under_sampling(df_train_full)
 
+# ----------------------------------------------------------------------------------------------------------------------
 # Train a DecisionTree model.
 model = RandomForestClassifier(labelCol="churn", featuresCol="features", numTrees=56, maxDepth=12)
 model = model.fit(trainingData)
