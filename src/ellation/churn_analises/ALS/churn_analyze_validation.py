@@ -1,4 +1,6 @@
 import os
+from functools import reduce
+from operator import ior
 
 import pandas as pd
 from imblearn.under_sampling import RandomUnderSampler
@@ -28,47 +30,41 @@ def print_stats(clf, X, y, dataset_type='test'):
     print('average confusion', (d['predicted not churn']['not churn'] + d['predicted churn']['churn']) / 2)
 
 
-def get_X_y(df):
-    X = df.loc[:, flt].values
+def get_X_y(df, columns):
+    X = df.loc[:, columns].values
     y = df.churn.values
     return X, y
 
 
 # S3://codemobs-datalab/ml/vladimir/data_joined_original_joined.csv/
 df = pd.read_csv(f'{DIR}/original_dataset_20190312.csv')
-flt = (df.columns != 'dwed_account_key') & (df.columns != 'churn') & (df.columns != 'userId') \
-          & (
-         (df.columns != 'avg_sd')
-         & (df.columns != 'five_or_less')
-         & (df.columns != 'ten_or_less')
-         & (df.columns != 'fifteen_or_less')
-         & (df.columns != 'twenty_or_less')
-         & (df.columns != 'more_than_twenty')
-         & (df.columns != 'std_sd')
-         # & (df.columns != 'free_seconds')
-         # & (df.columns != 'paid_seconds')
-         # & (df.columns != 'total_days')
-         # & (df.columns != 'avg_iat')
-         # & (df.columns != 'skip_ratio')
-         # & (df.columns != 'sum_consumption_time')
-         # & (df.columns != 'std_iat')
-         # & (df.columns != 'total_streams')
-         # & (df.columns != 'std_free_seconds')
-         # & (df.columns != 'std_paid_seconds')
-         & (df.columns != 'f1')
-         & (df.columns != 'f2')
-         & (df.columns != 'f3')
-         & (df.columns != 'f4')
-         & (df.columns != 'f5')
-)
+columns = [
+    'free_seconds',
+    'paid_seconds',
+    'total_days',
+    'avg_iat',
+    'skip_ratio',
+    'sum_consumption_time',
+    'std_iat',
+    'total_streams',
+    'std_free_seconds',
+    'std_paid_seconds',
+]
+# columns += [f'f{i}' for i in range(1, 6)]
 
-X, y = get_X_y(df)
+column_selector = reduce(ior, [(df.columns == c) for c in columns])
+
+X, y = get_X_y(df, column_selector)
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 X_train, y_train = resampling(X_train, y_train)
 clf = RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0)
 clf.fit(X_train, y_train)
+
 print_stats(clf, X_train, y_train, dataset_type='train')
 print_stats(clf, X_test, y_test, dataset_type='test')
 # s3://codemobs-datalab/ml/vladimir/data_joined_v2.csv/
 df_validation = pd.read_csv(f'{DIR}/validation_dataset_3.csv')
-print_stats(clf, *get_X_y(df_validation), dataset_type='validation')
+print_stats(clf, *get_X_y(df_validation, column_selector), dataset_type='validation')
+
+print('\nFeature importance')
+print(pd.Series(dict(zip(df.loc[:, column_selector].columns, clf.feature_importances_))).sort_values(ascending=False))
