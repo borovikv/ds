@@ -6,7 +6,9 @@ from pyspark.ml.feature import VectorAssembler
 def under_sampling(df_train_full):
     df_class_0 = df_train_full[df_train_full['churn'] == 0]
     df_class_1 = df_train_full[df_train_full['churn'] == 1]
-    df_class_0_s = df_class_0.sample(False, 0.083717, seed=0)
+    sampling_ratio = 0.083717
+    sampling_ratio = df_class_1.count() / df_class_0.count()
+    df_class_0_s = df_class_0.sample(False, sampling_ratio, seed=0)
     trainingData = df_class_1.union(df_class_0_s)
     trainingData.groupBy('churn').count().show()
     return trainingData
