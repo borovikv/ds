@@ -15,28 +15,25 @@ def load_csv(path):
 
 
 rankParam = 5
-normalizedViewershipFileName = 's3://codemobs-datalab/ml/features_hidden_2018/'
+normalizedViewershipFileName = 's3://codemobs-datalab/ml/vladimir/eplicit_raiting/'
 
 dfViewNormalizedWithMedia = load_csv(normalizedViewershipFileName)
 
-dfViewForAls = dfViewNormalizedWithMedia.select('userIdInt', 'mediaIdInt', 'implicitRating')
+dfViewForAls = dfViewNormalizedWithMedia.select('userid', 'mediaid', 'implicitrating')
 als = ALS(
     maxIter=10,
     rank=rankParam,
     regParam=0.3,
     implicitPrefs=True,
     alpha=0.01,
-    userCol="userIdInt",
-    itemCol="mediaIdInt",
-    ratingCol="implicitRating",
+    userCol="userid",
+    itemCol="mediaid",
+    ratingCol="implicitrating",
     coldStartStrategy="drop"
 )
 model = als.fit(dfViewForAls)
 
-featuresDF = model.userFactors
-dfUserIdMap = dfViewNormalizedWithMedia.select('userId', 'userIdInt').distinct()
-result = featuresDF.join(dfUserIdMap, featuresDF.id == dfUserIdMap.userIdInt).select("userId", "features")
-
+result = model.userFactors.select(f.col('id').alias('user_id'), "features")
 for i in range(rankParam):
     result = result.withColumn('f{}'.format(i + 1), f.col('features').getItem(i))
 
