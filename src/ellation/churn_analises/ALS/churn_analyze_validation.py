@@ -6,9 +6,9 @@ import pandas as pd
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFE
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import confusion_matrix, f1_score, classification_report
 from sklearn.model_selection import train_test_split
-
+from collections import Counter
 DIR = os.path.dirname(__file__)
 
 
@@ -26,9 +26,18 @@ def print_stats(clf, X, y, dataset_type='test'):
     prediction = clf.predict(X)
     confusion = confusion_matrix(y, prediction)
     d = pd.DataFrame(confusion, index=['not churn', 'churn'], columns=['predicted not churn', 'predicted churn'])
+    # print(d)
     d = d.div(d.sum(axis=1), axis=0)
     print(d)
     print('average confusion', (d['predicted not churn']['not churn'] + d['predicted churn']['churn']) / 2)
+    print(classification_report(y, prediction, target_names=['not churn', 'churn']))
+    TN, FN = confusion[0]
+    FP, TP = confusion[1]
+    f1_p = 2 * TP / (2 * TP + FN + FP)
+    f1_n = 2 * TN / (2 * TN + FN + FP)
+    c = Counter(y)
+    weighted_average_f1 = (f1_n * c[0] + f1_p * c[1]) / (c[0] + c[1])
+    print(f1_p, f1_n, weighted_average_f1)
 
 
 def get_X_y(df, columns):
@@ -65,33 +74,32 @@ columns = [
 X, y = get_X_y(df, columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
 X_train, y_train = resampling(X_train, y_train)
-# clf = RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0)
-# clf.fit(X_train, y_train)
+clf = RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0)
+clf.fit(X_train, y_train)
 
-# print(columns)
 # print_stats(clf, X_train, y_train, dataset_type='train')
-# print_stats(clf, X_test, y_test, dataset_type='test')
+print_stats(clf, X_test, y_test, dataset_type='test')
 
 # s3://codemobs-datalab/ml/vladimir/data_joined_v2.csv/
-# df_validation = pd.read_csv(f'{DIR}/validation_dataset_3.csv')
-# print_stats(clf, *get_X_y(df_validation, columns), dataset_type='validation')
+df_validation = pd.read_csv(f'{DIR}/data/validation_dataset_3.csv')
+print_stats(clf, *get_X_y(df_validation, columns), dataset_type='validation')
 
 # print('\nFeature importance')
 # print(pd.Series(dict(zip(df.loc[:, columns].columns, clf.feature_importances_))).sort_values(ascending=False))
 
+#
+# df_values = df.loc[:, reduce(ior, [(df.columns == c) for c in columns])]
+# for j in range(1, len(df_values.columns) + 1):
+#     print(j, '*' * 100)
+#     select = RFE(RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0), n_features_to_select=j)
+#     select.fit(X_train, y_train)
+#     X_train_selected = select.transform(X_train)
+#     X_test_selected = select.transform(X_test)
+#
+#     clf = RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0)
+#     clf.fit(X_train_selected, y_train)
+#     print(list(df_values.columns[select.support_]))
+#     print_stats(clf, X_test_selected, y_test, dataset_type='test')
 
-df_values = df.loc[:, reduce(ior, [(df.columns == c) for c in columns])]
-for j in range(1, len(df_values.columns) + 1):
-    print(j, '*' * 100)
-    select = RFE(RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0), n_features_to_select=j)
-    select.fit(X_train, y_train)
-    X_train_selected = select.transform(X_train)
-    X_test_selected = select.transform(X_test)
-
-    clf = RandomForestClassifier(n_estimators=56, max_depth=12, random_state=0)
-    clf.fit(X_train_selected, y_train)
-    print(list(df_values.columns[select.support_]))
-    print_stats(clf, X_test_selected, y_test, dataset_type='test')
-
-['free_seconds', 'paid_seconds', 'total_days', 'avg_iat', 'five_or_less', 'ten_or_less', 'skip_ratio',
- 'sum_consumption_time', 'std_iat', 'total_streams', 'std_free_seconds', 'std_paid_seconds']
+# ['free_seconds', 'paid_seconds', 'total_days', 'avg_iat', 'five_or_less', 'ten_or_less', 'skip_ratio',
+#  'sum_consumption_time', 'std_iat', 'total_streams', 'std_free_seconds', 'std_paid_seconds']
