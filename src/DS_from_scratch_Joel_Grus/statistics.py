@@ -1,6 +1,9 @@
 from collections import Counter
 
 # Показатели центра распределения
+import math
+
+from DS_from_scratch_Joel_Grus.linear_algebra import sum_of_squares
 
 
 def mean(x: list):
@@ -42,3 +45,31 @@ def mode(v):
 
 
 # Показатели вариации
+
+def data_range(v):
+    # размах
+    return max(v) - min(v)
+
+
+def variance(v):
+    n = len(v)
+    deviations = de_mean(v)
+    return sum_of_squares(deviations) / (n - 1)
+
+
+def de_mean(v):
+    # вектор отклонения от среднего
+    x_bar = mean(v)
+    return [x_i - x_bar for x_i in v]
+
+
+def standart_deviation(v):
+    return math.sqrt(variance(v))
+
+
+def interquartile_range(v):
+    # этот показатель позволяет простым образом исключить влияние небольшого числа выбросов
+    return quantile(v, 0.75) - quantile(v, 0.25)
+
+
+# Корреляция
