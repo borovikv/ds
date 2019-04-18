@@ -1,10 +1,10 @@
+import math
 from collections import Counter
 
+import DS_from_scratch_Joel_Grus.linear_algebra as la
+
+
 # Показатели центра распределения
-import math
-
-from DS_from_scratch_Joel_Grus.linear_algebra import sum_of_squares
-
 
 def mean(x: list):
     return sum(x) / len(x)
@@ -54,7 +54,7 @@ def data_range(v):
 def variance(v):
     n = len(v)
     deviations = de_mean(v)
-    return sum_of_squares(deviations) / (n - 1)
+    return la.sum_of_squares(deviations) / (n - 1)
 
 
 def de_mean(v):
@@ -73,3 +73,17 @@ def interquartile_range(v):
 
 
 # Корреляция
+def covariance(x, y):
+    n = len(x)
+    return la.dot(de_mean(x), de_mean(y)) / (n - 1)
+
+
+def correlation(x, y):
+    stdev_x = standart_deviation(x)
+    stdev_y = standart_deviation(y)
+    if stdev_x > 0 and stdev_y > 0:
+        return covariance(x, y) / stdev_x / stdev_y
+    else:
+        return 0
+
+
