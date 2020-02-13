@@ -53,7 +53,7 @@ svc = SVC(gamma=.05)
 
 digits = load_digits()
 X = digits.data
-y = digits.target == 9
+y = digits.target != 9
 
 # print_metrics(X, y, logreg, svc, DummyClassifier())
 # plot_precision_recall_curve(X, y, svc, logreg)
@@ -66,7 +66,13 @@ y = digits.target == 9
 
 
 
-print_metrics(digits.data, digits.target, logreg, svc, DummyClassifier())
+# print_metrics(digits.data, digits.target, DummyClassifier())
 
 
-plt.show()
+# plt.show()
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+c = DummyClassifier()
+c = c.fit(X_train, y_train)
+# prediction = c.predict(X_test)
+prediction = [True] * len(y_test)
+print(confusion_matrix(y_test, prediction))

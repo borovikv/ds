@@ -85,5 +85,3 @@ def correlation(x, y):
         return covariance(x, y) / stdev_x / stdev_y
     else:
         return 0
-
-
