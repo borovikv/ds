@@ -1,6 +1,6 @@
 import pytest
 
-import preparation.p1.strings as subj
+import preparation.strings as subj
 
 
 def test_contains_not_unique_symbols():

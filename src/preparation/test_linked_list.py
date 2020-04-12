@@ -1,6 +1,6 @@
 import pytest
 
-import preparation.p1.linked_list as subj
+import preparation.linked_list as subj
 
 
 def test_find_dub():
