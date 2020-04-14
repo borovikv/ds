@@ -1,5 +1,5 @@
-from collections import deque
 import timeit
+from collections import deque
 
 
 def find_path_breadth(graph, start, end):
@@ -87,8 +87,13 @@ def create_binary_tree_2(a, start=0, stop=None):
     return n
 
 
-n = create_binary_tree_2(list(range(1, 800)))
+n = create_binary_tree_2(list(range(1, 8)))
 n.pre_order_traversal()
+
+t = timeit.timeit('create_binary_tree(list(range(1, 8000)))', "from __main__ import create_binary_tree", number=1)
+print(t)
+t = timeit.timeit('create_binary_tree_2(list(range(1, 8000)))', "from __main__ import create_binary_tree_2", number=1)
+print(t)
 
 
 # 4.3
@@ -106,7 +111,18 @@ print(get_level_nodes(n, 1))
 print(get_level_nodes(n, 2))
 
 
-t = timeit.timeit('create_binary_tree(list(range(1, 8000)))', "from __main__ import create_binary_tree", number=10)
-print(t)
-t = timeit.timeit('create_binary_tree_2(list(range(1, 8000)))', "from __main__ import create_binary_tree_2", number=10)
-print(t)
+def get_levels(root, level=0, levels=None):
+    if not root:
+        return
+    if not levels:
+        levels = []
+    if level == len(levels):
+        levels.append([])
+    levels[level].append(root)
+    get_levels(root.left, level + 1, levels)
+    get_levels(root.right, level + 1, levels)
+    return levels
+
+
+print(get_levels(n))
+
