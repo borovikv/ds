@@ -21,4 +21,4 @@ def test_find_path():
     assert result == [[a, b, d], [a, c, d]]
 
     result = subj.find_path_depth(g, a, d)
-    print(result)
+    pprint(result)
