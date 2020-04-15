@@ -87,13 +87,13 @@ def create_binary_tree_2(a, start=0, stop=None):
     return n
 
 
-n = create_binary_tree_2(list(range(1, 8)))
-n.pre_order_traversal()
-
-t = timeit.timeit('create_binary_tree(list(range(1, 8000)))', "from __main__ import create_binary_tree", number=1)
-print(t)
-t = timeit.timeit('create_binary_tree_2(list(range(1, 8000)))', "from __main__ import create_binary_tree_2", number=1)
-print(t)
+# n = create_binary_tree_2(list(range(1, 8)))
+# n.pre_order_traversal()
+#
+# t = timeit.timeit('create_binary_tree(list(range(1, 8000)))', "from __main__ import create_binary_tree", number=1)
+# print(t)
+# t = timeit.timeit('create_binary_tree_2(list(range(1, 8000)))', "from __main__ import create_binary_tree_2", number=1)
+# print(t)
 
 
 # 4.3
@@ -106,9 +106,9 @@ def get_level_nodes(root, level):
     return result
 
 
-print(get_level_nodes(n, 0))
-print(get_level_nodes(n, 1))
-print(get_level_nodes(n, 2))
+# print(get_level_nodes(n, 0))
+# print(get_level_nodes(n, 1))
+# print(get_level_nodes(n, 2))
 
 
 def get_levels(root, level=0, levels=None):
@@ -124,5 +124,55 @@ def get_levels(root, level=0, levels=None):
     return levels
 
 
-print(get_levels(n))
+# print(get_levels(n))
 
+
+# 4.4
+def is_balanced(root):
+    if root is None:
+        return True
+    if abs(get_height(root.left) - get_height(root.right)) > 1:
+        return False
+    return is_balanced(root.left) and is_balanced(root.right)
+
+
+def get_height(root):
+    if not root:
+        return 0
+    return max(get_height(root.left), get_height(root.right)) + 1
+
+
+def check_height(root):
+    if root is None:
+        return 0
+    left_height = check_height(root.left)
+    right_height = check_height(root.right)
+    if abs(left_height - right_height) > 1:
+        raise RuntimeError(f'tree is not balanced {root}')
+    return max(left_height, right_height) + 1
+
+
+def is_balanced_2(root):
+    try:
+        check_height(root)
+    except RuntimeError as e:
+        print(e)
+        return False
+    return True
+
+
+# print(is_balanced(n))
+# print(get_height(n))
+# n = Node(20)
+# n.left = Node(10)
+# n.right = Node(30)
+# n.right.right = Node(40)
+# n.right.right.right = Node(50)
+# n.pre_order_traversal()
+# print(is_balanced(n))
+# print(get_height(n))
+# print(is_balanced_2(n))
+# n.left.right = Node(11)
+# n.right.left = Node(25)
+# n.pre_order_traversal()
+# print(is_balanced_2(n))
