@@ -1,4 +1,4 @@
-import timeit
+# import timeit
 from collections import deque
 
 
@@ -63,6 +63,20 @@ class Node:
         for c in [self.left, self.right]:
             if c:
                 c.pre_order_traversal(indent)
+            else:
+                print('\t' * indent + '*')
+
+    def __gt__(self, other):
+        return self.value > other.value
+
+    def __ge__(self, other):
+        return self.value >= other.value
+
+    def __le__(self, other):
+        return self.value <= other.value
+
+    def __eq__(self, other):
+        return self.value == other.value
 
 
 def create_binary_tree(a):
@@ -161,18 +175,65 @@ def is_balanced_2(root):
     return True
 
 
-# print(is_balanced(n))
-# print(get_height(n))
-# n = Node(20)
-# n.left = Node(10)
-# n.right = Node(30)
-# n.right.right = Node(40)
-# n.right.right.right = Node(50)
-# n.pre_order_traversal()
-# print(is_balanced(n))
-# print(get_height(n))
-# print(is_balanced_2(n))
-# n.left.right = Node(11)
-# n.right.left = Node(25)
-# n.pre_order_traversal()
-# print(is_balanced_2(n))
+# 4.5
+def is_binary_search_tree(root):
+    if root is None:
+        return True
+    if root.left and find(max, root.left) >= root or root.right and root > find(min, root.right):
+        return False
+    return is_binary_search_tree(root.left) and is_binary_search_tree(root.right)
+
+
+def find(f, root):
+    if not root:
+        return
+    return f(filter(bool, (root, find(f, root.left), find(f, root.right))))
+
+
+# ---------------------------------------------------------------------------------------------------------
+
+def is_binary_search_tree_2(root):
+    if root is None:
+        return True
+    if is_ge(root.left, root) or is_lt(root.right, root):
+        return False
+    return is_binary_search_tree(root.left) and is_binary_search_tree(root.right)
+
+
+def is_ge(root, current):
+    if not root:
+        return False
+    if root >= current:
+        return True
+    return is_ge(root.left, current) or is_ge(root.right, current)
+
+
+def is_lt(root, current):
+    if not root:
+        return False
+    if root < current:
+        return True
+    return is_lt(root.left, current) or is_lt(root.right, current)
+
+
+# ---------------------------------------------------------------------------------------------------------
+
+def check_bst(root):
+    def check_bst_inner(n, last=None):
+        if n is None:
+            return True, last
+
+        is_bst, last = check_bst_inner(n.left, last)
+        if not is_bst:
+            return False, None
+
+        if last is not None and n <= last:
+            return False, None
+
+        is_bst, last = check_bst_inner(n.right, n)
+        if not is_bst:
+            return False, None
+
+        return True, last
+
+    return check_bst_inner(root)[0]
