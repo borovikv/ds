@@ -53,6 +53,7 @@ class Node:
         self.value = value
         self.left = None
         self.right = None
+        self.parent = None
 
     def __repr__(self):
         return str(self.value)
@@ -77,6 +78,13 @@ class Node:
 
     def __eq__(self, other):
         return self.value == other.value
+
+    def add(self, where, node):
+        if where == 'left':
+            self.left = node
+        else:
+            self.right = node
+        node.parent = self
 
 
 def create_binary_tree(a):
@@ -237,3 +245,56 @@ def check_bst(root):
         return True, last
 
     return check_bst_inner(root)[0]
+
+
+def check_bst_2(n, min_n=None, max_n=None):
+    print(n, min_n, max_n)
+    if not n:
+        return True
+    if min_n and n < min_n or max_n and n >= max_n:
+        return False
+    if not (check_bst_2(n.left, min_n, n) and check_bst_2(n.right, n, max_n)):
+        return False
+    return True
+
+
+# **************************************************************************************************************
+# 4.6
+def get_next(node):
+    # the solution is not correct due to miss understanding acceptance criteria
+    if node.parent is None:
+        return
+    if node.parent and node.parent.right and node.parent.right != node:
+        return node.parent.right
+
+    next_parent = get_next(node.parent)
+    if next_parent.left:
+        return next_parent.left
+    elif next_parent.right:
+        return next_parent.right
+    return next_parent
+
+
+def left_most_child(n):
+    if n is None:
+        return
+    while n.left:
+        n = n.left
+    return n
+
+
+def inorder_succ(n):
+    if n is None:
+        return
+    if n.right:
+        return left_most_child(n.right)
+    else:
+        q = n
+        q_parent = q.parent
+        while q_parent and q_parent.left != q:
+            q = q_parent
+            q_parent = q.parent
+        return q_parent
+
+# **************************************************************************************************************
+# 4.7
