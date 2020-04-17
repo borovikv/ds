@@ -296,5 +296,51 @@ def inorder_succ(n):
             q_parent = q.parent
         return q_parent
 
+
 # **************************************************************************************************************
 # 4.7
+def build_dependency(projects):
+    result = []
+    seen = set()
+    for k in projects:
+        if k not in result and k not in seen:
+            recursive_topological_sort(projects, k, set(), result)
+
+    return result
+
+
+def recursive_topological_sort(graph, node, seen, result):
+    if node in result:
+        return True
+    if node in seen:
+        raise Exception('cycle', )
+    seen.add(node)
+    for child in graph[node]:
+        recursive_topological_sort(graph, child, seen, result)
+    result.append(node)
+    return True
+
+
+def build_dependency_2(projects, result=None):
+    if result is None:
+        result = []
+    if not projects:
+        return result
+    for p, dependencies in projects.items():
+        if not dependencies:
+            if p not in result:
+                result.append(p)
+        for d in dependencies:
+            if d not in projects:
+                dependencies.remove(d)
+                if d not in result:
+                    result.append(d)
+            else:
+                if p in projects[d]:
+                    raise Exception('Cycle')
+
+    for r in result:
+        projects.pop(r, None)
+    build_dependency_2(projects, result)
+    return result
+

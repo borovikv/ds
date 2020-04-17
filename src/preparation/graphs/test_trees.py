@@ -95,7 +95,7 @@ def test_get_next():
     result = subj.get_next(n4_5)
     assert result == n10_5
 
-    print('-'*100)
+    print('-' * 100)
     root.pre_order_traversal()
 
     result = subj.inorder_succ(n4_5)
@@ -103,6 +103,40 @@ def test_get_next():
 
     result = subj.inorder_succ(root)
     print(result)
-    print('-'*100)
-    subj.symentrical_order(root)
     print(subj.inorder_succ(n2))
+
+
+def test_build_dependencies():
+    a, b, c, d, e, f = 'abcdef'
+    projects = [a, b, c, d, e, f ]
+    # dependency = [(d, a), (b, f), (d, b), (a, f), (c, d)]
+    dependencies = dict(
+        d=[a, b],
+        b=[f],
+        a=[f],
+        c=[d],
+        e=[],
+        f=[]
+    )
+    result = subj.build_dependency(dependencies)
+    print(result)
+    expected = [f, e, a, b, d, c]
+    assert expected == result
+
+
+def test_build_dependencies_rises_error():
+    a, b, c, d, e, f = 'abcdef'
+    projects = [a, b, c, d, e, f ]
+    # dependency = [(d, a), (b, f), (d, b), (a, f), (c, d)]
+    dependencies = dict(
+        d=[a, b, c],
+        b=[f],
+        a=[f],
+        c=[d],
+        e=[],
+        f=[]
+    )
+    result = subj.build_dependency(dependencies)
+    print(result)
+    expected = [f, e, a, b, d, c]
+    assert expected == result
