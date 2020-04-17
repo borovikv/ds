@@ -108,7 +108,7 @@ def test_get_next():
 
 def test_build_dependencies():
     a, b, c, d, e, f = 'abcdef'
-    projects = [a, b, c, d, e, f ]
+    projects = [a, b, c, d, e, f]
     # dependency = [(d, a), (b, f), (d, b), (a, f), (c, d)]
     dependencies = dict(
         d=[a, b],
@@ -126,7 +126,7 @@ def test_build_dependencies():
 
 def test_build_dependencies_rises_error():
     a, b, c, d, e, f = 'abcdef'
-    projects = [a, b, c, d, e, f ]
+    projects = [a, b, c, d, e, f]
     # dependency = [(d, a), (b, f), (d, b), (a, f), (c, d)]
     dependencies = dict(
         d=[a, b, c],
@@ -140,3 +140,19 @@ def test_build_dependencies_rises_error():
     print(result)
     expected = [f, e, a, b, d, c]
     assert expected == result
+
+
+def test_find_common_parent():
+    n0, n1, n2, n3, n4, n5, n6, n7, n8 = [subj.Node(i) for i in range(9)]
+    root = n0
+    root.left = n1
+    n1.left = n2
+    n1.right = n3
+    n2.right = n4
+    n3.left = n5
+    result = subj.find_common_parent(root, n4, n5)
+    print(result)
+    assert n1 == result
+    result = subj.common_ancestor(root, n4, n5)
+    print(result)
+    assert n1 == result

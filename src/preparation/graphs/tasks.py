@@ -344,3 +344,42 @@ def build_dependency_2(projects, result=None):
     build_dependency_2(projects, result)
     return result
 
+
+# **************************************************************************************************************
+# 4.8
+def find_common_parent(root, n1, n2):
+    if not root or root in (n1, n2):
+        return root
+    n1_on_left = dfs(root.left, n1)
+    n2_on_left = dfs(root.left, n2)
+    if n1_on_left != n2_on_left:
+        return root
+    side = root.left if n1_on_left else root.right
+    return find_common_parent(side, n1, n2)
+
+
+def dfs(root, node):
+    if not root:
+        return False
+    if root == node:
+        return True
+    return dfs(root.left, node) or dfs(root.right, node)
+
+
+def common_ancestor(root, p, q):
+    if not root:
+        return
+    if root == p or root == q:
+        return root
+
+    ancestors = []
+    for n in [root.left, root.right]:
+        ancestor = common_ancestor(n, p, q)
+        if ancestor and ancestor != p and ancestor != q:
+            return ancestor
+        ancestors.append(ancestor)
+
+    x, y = ancestors
+    if x and y:
+        return root
+    return x or y
