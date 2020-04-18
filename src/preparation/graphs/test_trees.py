@@ -156,3 +156,21 @@ def test_find_common_parent():
     result = subj.common_ancestor(root, n4, n5)
     print(result)
     assert n1 == result
+
+
+def test_get_initial_dataset():
+    n0, n1, n2, n3, n4, n5, n6, n7, n8 = [subj.Node(i) for i in range(9)]
+
+    root = n4
+    root.left = n2
+    root.right = n6
+    n2.left = n1
+    n2.right = n3
+    n6.left = n5
+    n6.right = n7
+    result = subj.get_initial_dataset(root)
+    expected = [
+        [n4, n2, n6], [n4, n6, n2],
+    ]
+
+    assert result == expected

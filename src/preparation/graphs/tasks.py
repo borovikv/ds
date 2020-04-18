@@ -383,3 +383,38 @@ def common_ancestor(root, p, q):
     if x and y:
         return root
     return x or y
+
+
+# **************************************************************************************************************
+# 4.9
+def get_initial_dataset(root):
+    result = []
+    if not root:
+        result.append([])
+        return result
+    left_seq = get_initial_dataset(root.left)
+    right_seq = get_initial_dataset(root.right)
+
+    for left in left_seq:
+        for right in right_seq:
+            weaved = []
+            weave(left, right, [root], weaved)
+            result += weaved
+    return result
+
+
+def weave(first, second, prefix, results):
+    print(first, second, prefix, results)
+    if not first or not second:
+        results.append(prefix + first + second)
+        return
+
+    prefix.append(first[0])
+    weave(first[1:], second, prefix, results)
+    prefix.pop()
+
+    prefix.append(second[0])
+    weave(first, second[1:], prefix, results)
+    prefix.pop()
+
+
