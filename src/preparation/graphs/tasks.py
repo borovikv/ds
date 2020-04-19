@@ -483,6 +483,8 @@ def match_tree(r1, r2):
         return match_tree(r1.left, r2.left) and match_tree(r1.right, r2.right)
 
 
+# **************************************************************************************************************
+# 4.11
 class NodeWithRandom:
     def __init__(self, value, parent=None):
         self.value = value
@@ -516,7 +518,7 @@ class NodeWithRandom:
     def __getattr__(self, item):
         if item in ['left', 'right']:
             return self.__dict__[f'_{item}']
-        return super(NodeWithRandom, self).__getattr__(item)
+        return self.__dict__[item]
 
     def get_random_node(self):
         n = randint(0, self.children)
@@ -539,3 +541,30 @@ def breadth_first_search(root, nth):
             if n:
                 queue.append(n)
 
+
+# **************************************************************************************************************
+# 4.12
+def find_all_path_for_number(root, target_sum):
+    if not root:
+        return 0
+    paths = path_with_sum_from_node(root, target_sum, 0)
+    paths_on_left = find_all_path_for_number(root.left, target_sum)
+    paths_on_right = find_all_path_for_number(root.right, target_sum)
+    return paths + paths_on_left + paths_on_right
+
+
+def path_with_sum_from_node(root, target_sum, current=0):
+    if not root:
+        return 0
+    current += root.value
+    total_paths = 0
+    if current == target_sum:
+        total_paths += 1
+    total_paths += path_with_sum_from_node(root.left, target_sum, current)
+    total_paths += path_with_sum_from_node(root.right, target_sum, current)
+    return total_paths
+
+
+r = create_binary_tree([-3, -2, -1, 5, 6, 7, 8])
+r.pre_order_traversal()
+print(find_all_path_for_number(r, 2))
