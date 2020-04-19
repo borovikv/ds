@@ -1,5 +1,6 @@
 # import timeit
 from collections import deque
+from random import randint
 
 
 def find_path_breadth(graph, start, end):
@@ -349,7 +350,7 @@ def build_dependency_2(projects, result=None):
 
 # **************************************************************************************************************
 # 4.8
-def find_common_parent(root, n1, n2):
+def find_common_parent(root: Node, n1, n2):
     if not root or root in (n1, n2):
         return root
     n1_on_left = dfs(root.left, n1)
@@ -360,7 +361,7 @@ def find_common_parent(root, n1, n2):
     return find_common_parent(side, n1, n2)
 
 
-def dfs(root, node):
+def dfs(root: Node, node):
     if not root:
         return False
     if root == node:
@@ -480,3 +481,61 @@ def match_tree(r1, r2):
         return False
     else:
         return match_tree(r1.left, r2.left) and match_tree(r1.right, r2.right)
+
+
+class NodeWithRandom:
+    def __init__(self, value, parent=None):
+        self.value = value
+        self.parent = parent
+        self._left = None
+        self._right = None
+        self.children = 0
+
+    def pre_order_traversal(self, indent=0):
+        print('\t' * indent + f'{self.value}')
+        indent += 1
+        for c in [self._left, self._right]:
+            if c:
+                c.pre_order_traversal(indent)
+
+    def __setattr__(self, key, value):
+        if key in ['left', 'right']:
+            if value is not None:
+                self.__dict__[f'_{key}'] = NodeWithRandom(value, self)
+                self.children += 1
+                if self.parent:
+                    self.parent.children += 1
+            else:
+                self.__dict__[f'_{key}'] = None
+                self.children -= 1
+                if self.parent:
+                    self.parent.children -= 1
+        else:
+            super(NodeWithRandom, self).__setattr__(key, value)
+
+    def __getattr__(self, item):
+        if item in ['left', 'right']:
+            return self.__dict__[f'_{item}']
+        return super(NodeWithRandom, self).__getattr__(item)
+
+    def get_random_node(self):
+        n = randint(0, self.children)
+        print(n)
+        return breadth_first_search(self, n)
+
+    def __repr__(self):
+        return str(self.value)
+
+
+def breadth_first_search(root, nth):
+    queue = deque([root])
+    counter = 0
+    while queue:
+        r = queue.popleft()
+        if counter == nth:
+            return r
+        counter += 1
+        for n in [r.left, r.right]:
+            if n:
+                queue.append(n)
+
