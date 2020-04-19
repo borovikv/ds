@@ -77,6 +77,8 @@ class Node:
         return self.value <= other.value
 
     def __eq__(self, other):
+        if not other:
+            return False
         return self.value == other.value
 
     def add(self, where, node):
@@ -418,3 +420,63 @@ def weave(first, second, prefix, results):
     prefix.pop()
 
 
+# **************************************************************************************************************
+# 4.10
+list()
+
+
+def is_sub_tree(t1, t2):
+    if not t2:
+        return True
+    node = find_first_node(t1, t2)
+    if not node:
+        return False
+    return match_tree(node, t2)
+    # if not (node.left == t2.left and node.right == t2.right):
+    #     return False
+    # return is_sub_tree(node, t2.left) and is_sub_tree(node, t2.right)
+
+
+def find_first_node(root, node):
+    if not root or root == node:
+        return root
+    return find_first_node(root.left, node) or find_first_node(root.right, node)
+
+
+def is_sub_tree_2(t1, t2):
+    a = pre_order_traversal(t2)
+    b = pre_order_traversal(t1)
+    return is_sublist(a, b)
+
+
+def pre_order_traversal(root):
+    if not root:
+        return [None]
+    return [root] + pre_order_traversal(root.left) + pre_order_traversal(root.right)
+
+
+def is_sublist(l1, l2: list):
+    first = l1[0]
+    indexes = (i for i, e in enumerate(l2) if e == first)
+    for i in indexes:
+        if l1 == l2[i:i + len(l1)]:
+            return True
+    return False
+
+
+def sub_tree(r1, r2):
+    # from book
+    if not r1:
+        return False
+    elif r1 == r2 and match_tree(r1, r2):
+        return True
+    return sub_tree(r1.left, r2) or sub_tree(r1.right, r2)
+
+
+def match_tree(r1, r2):
+    if not r1 and not r2:
+        return True
+    elif not r1 or not r2 or r1 != r2:
+        return False
+    else:
+        return match_tree(r1.left, r2.left) and match_tree(r1.right, r2.right)

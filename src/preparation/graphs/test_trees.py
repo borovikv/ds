@@ -174,3 +174,24 @@ def test_get_initial_dataset():
     ]
 
     assert result == expected
+
+
+def test_is_sub_tree():
+    n0, n1, n2, n3, n4, n5, n6, n7, n8 = [subj.Node(i) for i in range(9)]
+    root = n4
+    root.left = n2
+    root.right = n6
+    n2.left = n1
+    n2.right = n3
+    n1.left = n5
+    n1.right = n7
+
+    t2 = subj.Node(1)
+    t2.left = subj.Node(5)
+    t2.right = subj.Node(7)
+
+    assert subj.is_sub_tree(root, t2) is True
+    assert subj.is_sub_tree_2(root, t2) is True
+    t2.right.left = n0
+    assert subj.is_sub_tree(root, t2) is False
+    assert subj.is_sub_tree_2(root, t2) is False
