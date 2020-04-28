@@ -1,16 +1,22 @@
-import pandas as pd
+from random import shuffle
+
+a = list(range(10))
+print(a)
+shuffle(a)
+print(a)
 
 
-df = pd.read_csv('/Users/vborovic/Downloads/svod_by_media.csv')
-# print(df.groupby('m').sum())
-df.to_csv('/Users/vborovic/Downloads/svod_by_media_1.csv', index=False)
-# df1 = pd.read_csv('/Users/vborovic/Downloads/svod_by_media_1.csv')
-# print(df1.groupby('m').sum())
+def fib(n):
+    if n <= 1:
+        return n
+    a, b = 0, 1
+    for i in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+
+# for i in range(10):
+#     print(i, fib(i))
 
 
 
-# df = pd.read_csv('/Users/vborovic/Downloads/svod_by_user.csv')
-# df.to_csv('/Users/vborovic/Downloads/svod_by_user_1.csv', index=False)
-# print('loaded')
-
-# print(df.groupby('m').sum())
