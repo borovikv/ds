@@ -5,27 +5,32 @@ from random import randint
 
 def find_path_breadth(graph, start, end):
     queue = deque([start])
-    visited = {start}
+    visited = [start]
     result = []
     path = []
     while queue:
+        print(path, visited)
         v = queue.popleft()
         path.append(v)
         siblings = graph.get(v, [])
         for v1 in siblings:
+            if v1 in visited:
+                continue
             if v1 == end:
                 path.append(v1)
                 result.append(path)
-                path = [start]
+                path = []
+                queue = deque([start])
+                visited = [v]
                 break
-            if v1 not in visited:
-                queue.append(v1)
-                visited.add(v1)
+
+            queue.append(v1)
+            visited.append(v1)
     return result
 
 
 def find_path_depth(graph, start, end, paths=None, path=()):
-    if not paths:
+    if paths is None:
         paths = []
 
     if start == end:
@@ -139,7 +144,7 @@ def get_level_nodes(root, level):
 def get_levels(root, level=0, levels=None):
     if not root:
         return
-    if not levels:
+    if levels is None:
         levels = []
     if level == len(levels):
         levels.append([])
@@ -229,25 +234,25 @@ def is_lt(root, current):
 
 # ---------------------------------------------------------------------------------------------------------
 
-def check_bst(root):
-    def check_bst_inner(n, last=None):
-        if n is None:
-            return True, last
-
-        is_bst, last = check_bst_inner(n.left, last)
-        if not is_bst:
-            return False, None
-
-        if last is not None and n <= last:
-            return False, None
-
-        is_bst, last = check_bst_inner(n.right, n)
-        if not is_bst:
-            return False, None
-
-        return True, last
-
-    return check_bst_inner(root)[0]
+# def check_bst(root):
+#     def check_bst_inner(n, last=None):
+#         if n is None:
+#             return True, last
+#
+#         is_bst, last = check_bst_inner(n.left, last)
+#         if not is_bst:
+#             return False, None
+#
+#         if last and n <= last:
+#             return False, None
+#
+#         is_bst, last = check_bst_inner(n.right, n)
+#         if not is_bst:
+#             return False, None
+#
+#         return True, last
+#
+#     return check_bst_inner(root)[0]
 
 
 def check_bst_2(n, min_n=None, max_n=None):
@@ -304,11 +309,8 @@ def inorder_succ(n):
 # 4.7
 def build_dependency(projects):
     result = []
-    seen = set()
     for k in projects:
-        if k not in result and k not in seen:
-            recursive_topological_sort(projects, k, set(), result)
-
+        recursive_topological_sort(projects, k, set(), result)
     return result
 
 
@@ -316,7 +318,7 @@ def recursive_topological_sort(graph, node, seen, result):
     if node in result:
         return True
     if node in seen:
-        raise Exception('cycle', )
+        raise Exception('cycle')
     seen.add(node)
     for child in graph[node]:
         recursive_topological_sort(graph, child, seen, result)
@@ -324,27 +326,20 @@ def recursive_topological_sort(graph, node, seen, result):
     return True
 
 
-def build_dependency_2(projects, result=None):
-    if result is None:
-        result = []
-    if not projects:
-        return result
-    for p, dependencies in projects.items():
-        if not dependencies:
-            if p not in result:
-                result.append(p)
-        for d in dependencies:
-            if d not in projects:
-                dependencies.remove(d)
-                if d not in result:
-                    result.append(d)
-            else:
-                if p in projects[d]:
-                    raise Exception('Cycle')
-
-    for r in result:
-        projects.pop(r, None)
-    build_dependency_2(projects, result)
+def build_dep(projects):
+    to_be_processed = deque([d for d in projects if not projects[d]])
+    result = []
+    while to_be_processed:
+        r = to_be_processed.popleft()
+        if r not in result:
+            result.append(r)
+        for p, depend in projects.items():
+            if p in result:
+                continue
+            if r in depend:
+                depend.remove(r)
+            if not depend:
+                to_be_processed.append(p)
     return result
 
 
