@@ -103,3 +103,4 @@ src/skus/sku_table.csv
 
 .pytest_cache/*
 ellation/
+/data/
