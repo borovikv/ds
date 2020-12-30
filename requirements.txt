@@ -7,8 +7,12 @@ pandas
 sympy
 nose
 sklearn
-mglearn==0.1.6
+mglearn
 graphviz
 imblearn
 boto3
 s3fs
+
+scikit-learn
+cycler
+pydub

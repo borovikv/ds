@@ -104,3 +104,6 @@ src/skus/sku_table.csv
 .pytest_cache/*
 ellation/
 /data/
+src/resources/
+src/pronunciation/audio_chunks
+src/pronunciation/words/
