@@ -105,5 +105,5 @@ src/skus/sku_table.csv
 ellation/
 /data/
 src/resources/
-src/pronunciation/audio_chunks
+src/pronunciation/audio_chunks_old
 src/pronunciation/words/

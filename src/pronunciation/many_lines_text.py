@@ -22,14 +22,18 @@ def parse_many_lines():
         for s, t in zip(sub_headers, texts):
             _, a_type = s.split(maxsplit=1)
             for t1 in t.split(','):
-                result.append(dict(row, order=c, text=t1.strip(), type=a_type.strip()))
-                c += 1
+                if not t1.strip():
+                    continue
+                split = t1.split('/')
+                links = '|'.join([f'{c + i}' for i, _ in enumerate(split)])
+                result.append(dict(row, order=c, text=t1.strip(), type=a_type.strip(), files=links))
+                c += len(split)
 
     df = pd.DataFrame(result)
-    df.sort_values('chapter').to_csv('words/many_lines.csv', index=False)
+    df.sort_values('chapter').to_csv('words/many_line_1.csv', index=False)
 
 
-# parse_many_lines()
+parse_many_lines()
 
 
 def parse_sentences():
@@ -69,9 +73,13 @@ def parse_wfs():
         # lines[2] Phrases
         # lines[4] Sentences
         c = 0
-        for t in map(str.strip, lines[1].split(',')):
-            result.append(dict(row, order=c, text=t.strip(), type='Word'))
-            c += 1
+        for t in map(str.strip, re.split(r'[,;]', lines[1])):
+            split = t.split('/')
+            links = '|'.join([f'{c + i}' for i, _ in enumerate(split)])
+            result.append(dict(row, order=c, text=t.strip(), type='Word', files=links))
+            c += len(split)
+            # for i, x in enumerate(split):
+            #     c += 1
 
         for t in map(str.strip, lines[3].split(',')):
             result.append(dict(row, order=c, text=t.strip(), type='Phrase'))
@@ -83,6 +91,6 @@ def parse_wfs():
             c += 1
 
     df = pd.DataFrame(result)
-    df.to_csv('words/wfs.csv', index=False)
+    df.to_csv('words/wfs_1.csv', index=False)
 
 # parse_wfs()
